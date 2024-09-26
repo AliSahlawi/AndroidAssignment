@@ -9,5 +9,11 @@ object Dependencies {
     const val COMPOSE_GRAPHICS = "androidx.compose.ui:ui-graphics"
     const val TOOLING_PREVIEW = "androidx.compose.ui:ui-tooling-preview"
     const val MATERIAL3 = "androidx.compose.material3:material3"
+    const val RECYCLER_VIEW = "androidx.recyclerview:recyclerview:${DependenciesVersions.RECYCLER_VIEW}"
+    const val CONSTRAINT_LAYOUT = "androidx.constraintlayout:constraintlayout:${DependenciesVersions.CONSTRAINT_LAYOUT}"
+    const val APP_COMPAT = "androidx.appcompat:appcompat:${DependenciesVersions.APP_COMPAT}"
+    const val MATERIAL = "com.google.android.material:material:${DependenciesVersions.MATERIAL}"
+    const val VIEW_PAGER = "androidx.viewpager2:viewpager2:${DependenciesVersions.VIEW_PAGER}"
+    const val COROUTINES = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${DependenciesVersions.COROUTINES}"
 
 }

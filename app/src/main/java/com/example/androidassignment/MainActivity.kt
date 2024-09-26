@@ -1,45 +1,101 @@
 package com.example.androidassignment
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.androidassignment.features.list.presentation.view.ListScreen
-import com.example.androidassignment.ui.theme.AndroidAssignmentTheme
+import android.widget.SearchView
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.androidassignment.databinding.AssignViewBinding
+import com.example.androidassignment.features.assignment.adapter.ImagePagerAdapter
+import com.example.androidassignment.features.assignment.adapter.ListItemAdapter
+import com.example.androidassignment.features.assignment.model.AssignmentViewState
+import com.example.androidassignment.features.assignment.view.ModalBottomSheetDialog
+import com.example.androidassignment.features.assignment.viewModel.AssignmentViewModel
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: AssignViewBinding
+    private val viewModel: AssignmentViewModel by viewModels()
+    private val imagePagerAdapter: ImagePagerAdapter = ImagePagerAdapter()
+    private val listItemAdapter: ListItemAdapter = ListItemAdapter()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            AndroidAssignmentTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting("Hello Android!", modifier = Modifier.padding(innerPadding))
-                }
+        binding = DataBindingUtil.setContentView(this, R.layout.assign_view)
+        setUpViewPager()
+        setUpRecyclerView()
+        setupSearchView()
+        setupFab()
+        collectFlow()
+    }
+
+    private fun collectFlow() {
+        lifecycleScope.launch {
+            viewModel.uiState.collectLatest { state ->
+                updateUIState(state)
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AndroidAssignmentTheme {
-        Greeting("Android")
+    private fun updateUIState(state: AssignmentViewState) {
+        imagePagerAdapter.setImages(state.items.keys.toList())
+        state.items[state.selectedImage]?.let { listItemAdapter.setItems(it) }
     }
+
+    private fun setUpViewPager() {
+        with(binding) {
+            viewPager.adapter = imagePagerAdapter
+            tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab) {
+                    viewModel.onEvent(AssignmentViewModel.AssignmentUiEvent.OnImageChanged(tab.position))
+                }
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) {}
+
+                override fun onTabReselected(tab: TabLayout.Tab?) {}
+
+            })
+
+            TabLayoutMediator(tabLayout, viewPager) { _, _ -> }.attach()
+        }
+    }
+
+
+    private fun setUpRecyclerView() {
+        with(binding) {
+            recyclerView.adapter = listItemAdapter
+            recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
+        }
+    }
+
+    private fun setupSearchView() {
+
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
+            androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.onEvent(AssignmentViewModel.AssignmentUiEvent.OnQueryChanged(query.orEmpty()))
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                viewModel.onEvent(AssignmentViewModel.AssignmentUiEvent.OnQueryChanged(newText.orEmpty()))
+                return true
+            }
+        })
+    }
+
+    private fun setupFab() {
+        binding.fab.setOnClickListener {
+           val modal = ModalBottomSheetDialog(viewModel.getTop3Characters())
+            supportFragmentManager.let { modal.show(it,ModalBottomSheetDialog.TAG) }
+
+        }
+    }
+
 }

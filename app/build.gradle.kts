@@ -47,6 +47,8 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
+        dataBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = DependenciesVersions.KOTLIN_COMPILER

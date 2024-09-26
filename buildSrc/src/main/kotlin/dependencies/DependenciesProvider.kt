@@ -13,6 +13,12 @@ fun DependencyHandler.androidx() {
     implementation(Dependencies.COMPOSE_GRAPHICS)
     implementation(Dependencies.TOOLING_PREVIEW)
     implementation(Dependencies.MATERIAL3)
+    implementation(Dependencies.RECYCLER_VIEW)
+    implementation(Dependencies.CONSTRAINT_LAYOUT)
+    implementation(Dependencies.APP_COMPAT)
+    implementation(Dependencies.MATERIAL)
+    implementation(Dependencies.VIEW_PAGER)
+    implementation(Dependencies.COROUTINES)
 }
 
 fun DependencyHandler.testDeps() {
